@@ -24,3 +24,13 @@ export async function checkToken(token?: string): ApiResponse {
     return getHttpErrorResponse(error, "Failed to check token");
   }
 }
+
+export async function getItems(token?: string): ApiResponse {
+  try {
+    const headers = { Authorization: token };
+    const response = await http.get("/items", { headers });
+    return { data: response.data, error: "" };
+  } catch (error) {
+    return getHttpErrorResponse(error, "Failed to get items");
+  }
+}
