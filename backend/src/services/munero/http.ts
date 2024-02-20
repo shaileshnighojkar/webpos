@@ -17,6 +17,9 @@ http.interceptors.request.use((config) => {
     config.headers["signature"] = getSignature(config, xGiftlovDate, token);
   }
 
+  console.log("--- url", config.url);
+  console.log(config.headers);
+
   return config;
 });
 

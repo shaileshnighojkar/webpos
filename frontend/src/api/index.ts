@@ -11,9 +11,8 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
-export type SuccessApiResponse<T> = [T, string];
-export type ErrorApiResponse = [null, string];
-export type ApiResponse<T> = Promise<SuccessApiResponse<T> | ErrorApiResponse>;
+export type ApiResponse<T> = Promise<[T | null, string]>;
+
 export type TokenResponse = { data: { token: string } };
 
 export async function getToken(
@@ -36,15 +35,26 @@ export async function getToken(
   }
 }
 
+type CheckTokenResponse = { data: { isValid: boolean } };
+
 export async function checkToken(): ApiResponse<boolean> {
   try {
-    const response = await http.get<{ data: { isValid: boolean } }>(
-      "/auth/check"
-    );
-    console.log(response);
+    const response = await http.get<CheckTokenResponse>("/auth/check");
 
     return [response.data.data.isValid, ""];
   } catch (error) {
     return [null, "Error in checking auth token"];
+  }
+}
+
+type ItemsResponse = { data: { items: MuneroItem[] } };
+
+export async function getItems(): ApiResponse<MuneroItem[]> {
+  try {
+    const response = await http.get<ItemsResponse>("/items");
+
+    return [response.data.data.items, ""];
+  } catch (error) {
+    return [null, "Error in getting items"];
   }
 }

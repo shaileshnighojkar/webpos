@@ -31,7 +31,7 @@ router.get("/check", async (req, res) => {
         headers: { Authorization: req.headers.authorization },
       }
     );
-    console.log("---- token", response.data.token);
+
     isValid = !!response.data.token;
   } catch (error) {
     console.log(error);

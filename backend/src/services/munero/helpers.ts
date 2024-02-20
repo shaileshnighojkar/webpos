@@ -1,5 +1,6 @@
 import { AxiosError, AxiosRequestConfig } from "axios";
 import crypto from "crypto";
+import { flatten } from "safe-flat";
 
 /**
  * Get 'X-GIFTLOV-DATE' header value, current date in ddMMyyyyHHmmss format
@@ -35,19 +36,21 @@ export function getSignature(
   xGiftlovDate: string,
   token: string
 ) {
-  const { method, url, params = {} } = config;
+  const { method, url, params = {}, data } = config;
   const secret = process.env.MUNERO_SIGNATURE_SECRET || "";
   const hmac = crypto.createHmac("sha512", secret);
 
-  hmac.update(
+  // prettier-ignore
+  hmac.update([
+    url?.slice(1),
+    method?.toUpperCase(),
     [
-      url?.slice(1),
-      method?.toUpperCase(),
-      Object.values(params).sort().join(""),
-      xGiftlovDate,
-      token,
-    ].join("")
-  );
+      ...Object.values(flatten(data || {})).filter((e) => typeof e !== "object"),
+      ...Object.values(params),
+    ].sort().join(""),
+    xGiftlovDate,
+    token,
+  ].join(""));
 
   return hmac.digest("hex");
 }
