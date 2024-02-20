@@ -1,17 +1,43 @@
 import express from "express";
-import { getToken, checkToken } from "../services/munero";
+import muneroApi, { TOKEN_API_URL } from "../services/munero/http";
+import { getError } from "../services/munero/helpers";
+import { AxiosError } from "axios";
 
 const router = express.Router();
 
 router.post("/token", async (req, res) => {
-  const { username, password } = req.body;
-  const apiResponse = await getToken(username, password);
-  res.send(apiResponse);
+  try {
+    const response = await muneroApi.post(TOKEN_API_URL, {
+      username: req.body.username,
+      password: req.body.password,
+    });
+
+    res.send({ data: response.data.token });
+  } catch (error) {
+    const { status, message } = getError(error, "Failed to get munero token");
+
+    res.status(status).send({ error: message });
+  }
 });
 
 router.get("/check", async (req, res) => {
-  const apiResponse = await checkToken(req.headers.authorization);
-  res.send(apiResponse);
+  let isValid = false;
+
+  try {
+    const response = await muneroApi.post<{ token: string }>(
+      "/checkToken",
+      {},
+      {
+        headers: { Authorization: req.headers.authorization },
+      }
+    );
+    console.log("---- token", response.data.token);
+    isValid = !!response.data.token;
+  } catch (error) {
+    console.log(error);
+  }
+
+  res.send({ data: { isValid } });
 });
 
 export default router;

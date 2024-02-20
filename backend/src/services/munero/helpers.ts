@@ -74,3 +74,15 @@ export function getHttpErrorResponse(
     error: errorMessage || defaultErrorMessage,
   };
 }
+
+export function getError(error: unknown, defaultErrorMessage: string) {
+  let status = 500;
+  let message = "Error fetching data from munero server";
+
+  if (error instanceof AxiosError && error.response) {
+    status = error.response.status;
+    message = error.response.data?.message;
+  }
+
+  return { status, message };
+}
